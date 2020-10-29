@@ -1,0 +1,61 @@
+<html>
+<head><title>IP Tracker Help</title></head>
+<body style="background:#eef;">
+<h1>IP Tracker Help</h1>
+<p>The IP Tracker app puts any CFM page request's IP number through a gauntlet of reviews against an IP whitelist, an IP blacklist, a User Agent blacklist, and a URL Snippet blacklist, all of which are stored in the server variable scope so the lists are available to any website on your server.</p>
+<p>If the requestor survives that, their IP number is stored in a query object in the server scope with all the other requestor IP numbers, and reviewed via Query of Query. If the IP number has reached a configured threshold, ie; over 100 requests in 2 minutes, they get temporarily blocked and their IP number gets stored in the IP Block query object table for a configured duration of time, ie; an hour.</p>
+<p>These four permanent white and black lists, and the temporary IP Block table should help reduce the amount of illegitimate traffic to your sites, server-wide.</p>
+<p>All settings are contained in the _iptracker-site-config.cfm file, which should accompany the _iptracker-site.cfm file wherever you put it.</p>
+<hr>
+
+<p><strong>IP WhiteList</strong></p>
+<p>Permanent list of IP numbers you have white-listed so they&#39;ll never be blocked from any website on your server that uses the iptracker code. IP numbers in this list will in fact never even be scrutinized by the tracker app.</p>
+<p>You can manually add IP numbers to this list, or use the drop-down selector in the IP Blocked table for those who have been caught by the tracker app.</p>
+<p>This whitelist is saved to a text file so it can survive a server reboot. Any updates here are written to the text file, which is a comma delimited list all IP numbers are checked against.</p>
+<ul>
+	<li><tt>listFind(server.iptrack.ipwhitelist,cgi.remote_addr)</tt></li>
+</ul>
+
+<p><strong>IP BlackList</strong></p>
+<p>Permanent list of IP numbers you have black-listed so they&#39;ll forever be blocked from any website on your server that uses the iptracker code. IP numbers in this list will see the blocked message found at about line 50 of _iptrack-site.cfm.</p>
+<p>You can manually add IP numbers to this list, or use the drop-down selector in the IP Blocked table for those who have been caught by the tracker app.</p>
+<p>This blacklist is saved to a text file so it can survive a server reboot. Any updates here are written to the text file, which is a comma delimited list all IP numbers are checked against:</p>
+<ul>
+	<li><tt>listFind(server.iptrack.ipblacklist,cgi.remote_addr)</tt></li>
+</ul>
+
+<p><strong>UA BlackList</strong></p>
+<p>Permanent list of User Agents (UA) you want to block. These all need to be manually added via the textareas in the console. Look at the tracking table, or the blocking table to see if there are any spiders or bots you&#39;d like to keep away.</p>
+<p>When adding pieces of UA strings, make sure to use no punctuation or any special characters. Just use the short, best piece of text that appears in the user agent string.</p>
+<p>For instance, if you don&#39;t like Baidu, whose UA string is &quot;Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/<b>spider</b>.html)&quot;, you should add just &quot;Baiduspider&quot; to your UA Blacklist.</p>
+<p>The iptracker code will use regex to determine if any of the UA strings you&#39;ve entered appear in the user agent of the visitor.</p>
+<ul>
+	<li><tt>REFindNoCase(server.iptrack.uablacklist,cgi.http_user_agent)</tt></li>
+</ul>
+<p>Be very careful to NOT put in any common strings that could block all traffic, ie; &quot;Mozilla&quot; or &quot;html&quot; etc.</p>
+
+<p><strong>URL BlackList</strong></p>
+<p>Very much like the UA Blacklist, the URL Blacklist will use regex on your snippets to see if a visitor has them in their URL request.</p>
+<p>A good example is if you don&#39;t have WordPress or PHP on your server, you should block all requests that are looking for those kinds of pages / resources, ie; &quot;wp-admin&quot; or &quot;.php&quot;</p>
+<ul>
+	<li><tt>REFindNoCase(server.iptrack.urlblacklist,cgi.script_name &amp; &quot;?&quot; &amp; cgi.query_string)</tt></li>
+</ul>
+<p>Be very careful NOT to put in any URL snippets that could block all traffic, ie; &quot;.cfm&quot; etc.</p>
+<p><i>Please note: because the iptracker code only runs if a CFM page is requested, the only way to capture PHP, JPG, JS, CSS, or any other non-CFM resources is to ensure your IIS/Apache installation has a CFM-based 404 script, which will load the tracker code, so you can see that traffic in here.</i></p>
+<hr>
+
+<p><strong>IPs Blocked</strong></p>
+<p>This is a query object / table held in the server scope so it can be accessed by every website you add the iptracker code to.</p>
+<p>Any IP numbers that exceeded the threshold of number of requests in a certain period of time (ie; over 100 requests in 2 minutes) will automatically be added to this table and will be temporarily blocked for a certain period of time, after which they&#39;ll be released from the block list. These settings can be fine-tuned in _iptracker-site-config.cfm.</p>
+<p>When viewing the IPs Blocked table in the console, you can move any IPs caught in the block list to the permanent whitelist or blacklist via drop-down select, or you can leave them in the table, where they&#39;ll eventually be purged.</p>
+<p>If you have clients who operate out of a single office or building (meaning they very likely share one IP Number) and they work on their site frequently, they will almost certainly get caught by the tracker app and will show up in this table. You&#39;ll need to whitelist them to avoid any further interruptions.</p>
+
+<p><strong>IPs Tracked</strong></p>
+<p>This is a query object / table held in the server scope so it can be accessed by every website you add the iptracker code to.</p>
+<p>Every IP number that has requested a page on those sites will get tracked here if they&#39;re not in the whitelist or blacklist, or don&#39;t have an offending UA string or haven&#39;t requested a URL you don&#39;t like.</p>
+<p>We keep IP numbers in here for two minutes (or whatever you&#39;ve set it to in _iptracker-site-config.cfm). If the IP numbers exceed the threshold of number of requests in a certain period of time (ie; over 100 requests in 2 minutes) it will automatically be added to the IP Blocked table and will be temporarily blocked for a certain period of time, after which they&#39;ll be released from the block list. These settings can be fine-tuned in _iptracker-site-config.cfm.</p>
+
+<hr>
+<p><i>IP Tracker App by Michael Muller, <a href="https://montaguewebworks.com" target="_blank">Montague WebWorks</a>, October 2020.<br>Feel free to use anytime, anywhere. "Absolutely free. Only if you want to be."</i></p>
+</body>
+</html>
